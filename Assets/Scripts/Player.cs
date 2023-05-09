@@ -6,8 +6,14 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour, IKitchenObjectParent {
 
+    public static event EventHandler OnAnyPlayerSpawned;
+    public static event EventHandler OnAnyPickedSomething;
 
-    //public static Player Instance { get; private set; }
+    public static void ResetStaticData() {
+        OnAnyPlayerSpawned = null;
+    }
+
+    public static Player LocalInstance { get; private set; }
 
 
 
@@ -36,6 +42,14 @@ public class Player : NetworkBehaviour, IKitchenObjectParent {
     private void Start() {
         GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
         GameInput.Instance.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
+    }
+
+    public override void OnNetworkSpawn() {
+        if (IsOwner) {
+            LocalInstance = this;
+        }
+
+        OnAnyPlayerSpawned.Invoke(this, EventArgs.Empty);
     }
 
     private void GameInput_OnInteractAlternateAction(object sender, EventArgs e) {
@@ -99,7 +113,7 @@ public class Player : NetworkBehaviour, IKitchenObjectParent {
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void HandleMovementServerRpc(Vector2 inputVector) { 
+    private void HandleMovementServerRpc(Vector2 inputVector) {
                 Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
         float moveDistance = moveSpeed * Time.deltaTime;
@@ -206,6 +220,7 @@ public class Player : NetworkBehaviour, IKitchenObjectParent {
 
         if (kitchenObject != null) {
             OnPickedSomething?.Invoke(this, EventArgs.Empty);
+            OnAnyPickedSomething?.Invoke(this, EventArgs.Empty);
         }
     }
 
