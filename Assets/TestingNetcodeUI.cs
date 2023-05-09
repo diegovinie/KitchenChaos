@@ -30,4 +30,21 @@ public class TestingNetcodeUI : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.H))
+        {
+            Debug.Log("HOST");
+            NetworkManager.Singleton.StartHost();
+            Hide();
+        }
+
+        if (Input.GetKey(KeyCode.C))
+        {
+            Debug.Log("CLIENT");
+            NetworkManager.Singleton.StartClient();
+            Hide();
+        }
+    }
 }
